@@ -38,6 +38,10 @@ function Resolve-DNSNameOverHTTP {
     .PARAMETER DNSSEC
     -DNSSEC SWITCH
      enable DNSSEC
+
+    .PARAMETER SimpleOutput
+    -SimpleOutput SWITCH
+     enable simple output (only Answer property)
     
     .PARAMETER EDNSClientSubnet
 	-EDNSClientSubnet string{network subnet in CIDR format}
@@ -107,7 +111,9 @@ function Resolve-DNSNameOverHTTP {
             [switch]$DNSSEC,
         [parameter(Mandatory=$false)]
         [ValidateScript({($_ -match "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])") -or ($_ -match "s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?")})]
-            [string[]]$EDNSClientSubnet
+            [string[]]$EDNSClientSubnet,
+        [parameter(Mandatory=$false)]
+            [switch]$SimpleOutput
     )
     $DateRequest = get-date
     $padding = (new-guid).guid
@@ -158,7 +164,17 @@ function Resolve-DNSNameOverHTTP {
             }
         }
     }
-    if ($temp) {return $temp}
+    if ($temp) {
+        If (-not $SimpleOutput.IsPresent) {
+            return $temp
+        } else {
+            if ($temp.Answer) {
+                return $temp.Answer
+            } else {
+                return $temp.Authority
+            }
+        }
+    }
     if ($errorvalue) {return $errorvalue}
 }
 
