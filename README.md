@@ -34,6 +34,10 @@ using a simple powershell command and an internet access :-)
     .PARAMETER DNSSEC
     -DNSSEC SWITCH
      enable DNSSEC
+     
+     .PARAMETER SimpleOutput
+    -SimpleOutput SWITCH
+     enable simple output (only Answer property)
     
     .PARAMETER EDNSClientSubnet
 	-EDNSClientSubnet string{network subnet in CIDR format}
